@@ -1,1 +1,1 @@
-window.__PRODUCTION__ANTDV__PRO__CONF__={"VITE_GLOB_APP_TITLE":"antdv-pro"};Object.freeze(window.__PRODUCTION__ANTDV__PRO__CONF__);Object.defineProperty(window, "__PRODUCTION__ANTDV__PRO__CONF__", {configurable: false,writable: false,});
+window.__PRODUCTION__ANTDV__PRO__CONF__={"VITE_GLOB_APP_TITLE":"Libacao-LMS"};Object.freeze(window.__PRODUCTION__ANTDV__PRO__CONF__);Object.defineProperty(window, "__PRODUCTION__ANTDV__PRO__CONF__", {configurable: false,writable: false,});
