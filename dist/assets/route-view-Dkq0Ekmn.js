@@ -1,0 +1,1 @@
+import{H as e,N as t,it as n,lt as r}from"./vue-C3eY3n8m.js";var i=e({name:`RouteView`,__name:`route-view`,setup(e){return(e,i)=>{let a=r(`RouterView`);return n(),t(a)}}});export{i as default};

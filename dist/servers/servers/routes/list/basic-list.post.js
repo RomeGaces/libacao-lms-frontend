@@ -1,0 +1,79 @@
+import { __toESM } from "../../../_virtual/rolldown_runtime.js";
+import { defineEventHandler } from "../../../node_modules/.pnpm/h3@2.0.0-beta.4/node_modules/h3/dist/h3.js";
+import { require_dayjs_min } from "../../../node_modules/.pnpm/dayjs@1.11.18/node_modules/dayjs/dayjs.min.js";
+import cloneDeep_default from "../../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/cloneDeep.js";
+
+//#region servers/routes/list/basic-list.post.ts
+var import_dayjs_min = /* @__PURE__ */ __toESM(require_dayjs_min(), 1);
+var basic_list_post_default = defineEventHandler(async (_event) => {
+	const dataList = [
+		{
+			title: "Aipay",
+			link: "https://gw.alipayobjects.com/zos/rmsportal/WdGqmHpayyMjiEhcKoVE.png",
+			percent: 57,
+			content: "一生那么短，遗忘又那么漫长"
+		},
+		{
+			title: "Ant Design Vue",
+			link: "https://www.antdv.com/assets/logo.1ef800a8.svg",
+			percent: 60,
+			status: "active",
+			content: "只有在梦想中，人才能真正自由"
+		},
+		{
+			title: "Vue",
+			link: "https://gw.alipayobjects.com/zos/rmsportal/ComBAopevLwENQdKWiIn.png",
+			percent: 70,
+			status: "exception",
+			content: "生命就像一盒巧克力，结果往往出人意料"
+		},
+		{
+			title: "Vite",
+			link: "https://cn.vitejs.dev/logo.svg",
+			percent: 100,
+			status: "active",
+			content: "有时，你必须进入别人的世界去发现自己的世界缺少什么"
+		},
+		{
+			title: "React",
+			link: "https://gw.alipayobjects.com/zos/rmsportal/kZzEzemZyKLKFsojXItE.png",
+			percent: 50,
+			status: "exception",
+			content: "希望是件美丽的东西，也许是最好的东西"
+		},
+		{
+			title: "Antdv Pro",
+			link: "/logo.svg",
+			percent: 80,
+			status: "active",
+			content: "人并非生来就伟大，而是越活越伟大"
+		},
+		{
+			title: "Webpack",
+			link: "https://gw.alipayobjects.com/zos/rmsportal/nxkuOJlFJuAUhzlMTCEe.png",
+			percent: 58,
+			content: "不管何时何地，做你想做的事永远都不嫌晚"
+		},
+		{
+			title: "Angular",
+			link: "https://gw.alipayobjects.com/zos/rmsportal/zOsKZmFRdUtvpqCImOVY.png",
+			percent: 70,
+			status: "active",
+			content: "你要一直不停地往前走，不然你不会知道生活还会给你什么"
+		}
+	];
+	const data = [];
+	for (let i = 0; i < 1e3; i++) {
+		const arr = cloneDeep_default(dataList);
+		data.push(...arr);
+	}
+	for (let i = 0; i < data.length; i++) data[i].start = (0, import_dayjs_min.default)().subtract(i, "hour").format("YYYY-MM-DD HH:mm");
+	return {
+		code: 200,
+		msg: "获取成功",
+		data
+	};
+});
+
+//#endregion
+export { basic_list_post_default as default };

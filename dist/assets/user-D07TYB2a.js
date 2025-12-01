@@ -1,0 +1,1 @@
+import{F as e,it as t}from"./vue-C3eY3n8m.js";import{p as n}from"./index-Dx9zetBy.js";var r={};function i(n,r){return t(),e(`div`,null,` Ordinary users have the right to view Super administrators also have the right `)}var a=n(r,[[`render`,i]]);export{a as default};

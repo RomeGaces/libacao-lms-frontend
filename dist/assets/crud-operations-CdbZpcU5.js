@@ -1,0 +1,1 @@
+import{c as e,d as t,l as n,u as r}from"./index-Dx9zetBy.js";const i={list:(e,t)=>n(`/${e}`,t),get:(e,t)=>n(`/${e}/${t}`),create:(e,t)=>r(`/${e}`,t),update:(e,n,r)=>t(`/${e}/${n}`,r),remove:(t,n)=>e(`/${t}/${n}`)};export{i as t};
