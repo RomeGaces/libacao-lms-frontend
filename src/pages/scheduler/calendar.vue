@@ -5,11 +5,15 @@ import CalendarControls from './components/calendar-controls.vue'
 
 // ------------------- INTERFACES -------------------
 interface FilterInterface {
-  academic_year: string
-  semester: string
-  course_id: number
+  school_year_id: string | null
+  semester_id: string | null
+  course_id: number | null
+  professor_id: number | null
+  room_id: number | null
+  section_id: number | null
+  student_id: number | null
+  year_level: number | null
 }
-
 interface ClassItem {
   id: number
   title: string
@@ -44,6 +48,43 @@ interface CalendarEvent {
   [key: string]: any
 }
 
+interface SubjectOption {
+  id: number
+  subject_code: string
+  subject_name: string
+}
+
+interface ProfessorOption {
+  id: number
+  first_name: string
+  last_name: string
+  middle_name?: string
+}
+
+interface RoomOption {
+  id: number
+  room_number: string
+  building_name: string
+  capacity: number
+}
+
+type BuildingOption = string
+type TimeOption = string
+
+interface EditFormInterface {
+  id: number | null
+  subject_id: number | undefined
+  professor_id: number | undefined
+  building: string | undefined
+  room_id: number | undefined
+  day_of_week: string | undefined
+  start_time: string | undefined
+  end_time: string | undefined
+  section_id: number | undefined
+  course_id: number | undefined
+  year_level: number | undefined
+}
+
 // ------------------- CONFIG / STATE -------------------
 const slotMinutes = 30 // used for grid lines only
 const displayDays = [
@@ -63,10 +104,21 @@ const overlapGroups = ref<Record<string, CalendarEvent[][]>>({})
 
 const isLoading = ref(true)
 const filters = ref<FilterInterface>({
-  academic_year: '2025-2026',
-  semester: '1st',
-  course_id: 1,
+  school_year_id: null,
+  semester_id: null,
+  course_id: null,
+  professor_id: null,
+  room_id: null,
+  section_id: null,
+  student_id: null,
+  year_level: null,
 })
+
+const subjectOptions = ref<SubjectOption[]>([])
+const professorOptions = ref<ProfessorOption[]>([])
+const buildingOptions = ref<BuildingOption[]>([])
+const roomOptions = ref<RoomOption[]>([])
+const timeOptions = ref<TimeOption[]>([])
 
 // drawer & modal state
 const drawerVisible = ref(false)
@@ -77,12 +129,32 @@ const drawerMode = ref<'edit-single' | 'list-single-timeslot' | 'multi-timeslot'
 const editModalVisible = ref(false)
 const editModalData = ref<ClassItem | null>(null)
 
+const editForm = ref<EditFormInterface>({
+  id: null,
+  subject_id: undefined,
+  professor_id: undefined,
+  building: undefined,
+  room_id: undefined,
+  day_of_week: undefined,
+  start_time: undefined,
+  end_time: undefined,
+  section_id: undefined,
+  course_id: undefined,
+  year_level: undefined,
+})
+
 // compact heuristic
 const eventRefs = ref<HTMLElement[]>([])
 
 // time range
 const dayStartMinute = ref(7 * 60)
 const dayEndMinute = ref(18 * 60)
+// const timeOptions = Array.from({ length: ((19 - 7) * 60) / 5 + 1 }, (_, i) => {
+//   const totalMin = 7 * 60 + i * 5
+//   const h = String(Math.floor(totalMin / 60)).padStart(2, '0')
+//   const m = String(totalMin % 60).padStart(2, '0')
+//   return `${h}:${m}`
+// })
 
 // sizing - responsive
 const daysGridRef = ref<HTMLElement | null>(null)
@@ -102,11 +174,53 @@ const slotHeightPx = computed(() => (hourHeight.value * (slotMinutes / 60)))
 async function fetchSchedules() {
   isLoading.value = true
   try {
-    const query = new URLSearchParams({
-      academic_year: filters.value.academic_year,
-      semester: filters.value.semester,
-      course_id: String(filters.value.course_id),
-    }).toString()
+    const params: Record<string, string> = {}
+    // Ensure school_year_id is set
+    if (!filters.value.school_year_id) {
+      const syActive = await useGet('/master/active-school-year')
+      const activeId = syActive.data.data?.id
+
+      if (activeId) {
+        filters.value.school_year_id = activeId   // ← store it
+      }
+    }
+    else {
+      params.school_year_id = String(filters.value.school_year_id)
+    }
+
+    // Ensure semester_id is set
+    if (!filters.value.semester_id) {
+      const semActive = await useGet('/master/active-semester')
+      const activeId = semActive.data.data?.id
+
+      if (activeId) {
+        filters.value.semester_id = activeId      // ← store it
+      }
+    }
+    else {
+      params.semester_id = String(filters.value.semester_id)
+    }
+
+    if (filters.value.course_id != null)
+      params.course_id = String(filters.value.course_id)
+
+    if (filters.value.professor_id != null)
+      params.professor_id = String(filters.value.professor_id)
+
+    if (filters.value.student_id != null)
+      params.student_id = String(filters.value.student_id)
+
+    if (filters.value.room_id != null)
+      params.room_id = String(filters.value.room_id)
+
+    if (filters.value.section_id != null)
+      params.section_id = String(filters.value.section_id)
+
+    if (filters.value.year_level != null)
+      params.year_level = String(filters.value.year_level)
+
+
+    const query = new URLSearchParams(params).toString()
     const res = await useGet(`/schedules/query?${query}`)
     if (!res || !res.data) {
       throw new Error('Failed to fetch schedules')
@@ -138,7 +252,104 @@ function computeTimeRange() {
   }
   dayStartMinute.value = Math.max(6 * 60, Math.floor(minStart / 60) * 60)
   dayEndMinute.value = Math.min(22 * 60, Math.ceil(maxEnd / 60) * 60)
+
+
 }
+
+async function loadEditFormDropdowns() {
+  const sectionId = editForm.value.section_id
+  const courseId = editForm.value.course_id
+  const yearLevel = editForm.value.year_level
+
+  // Load class section for semester
+  const sectionRes = await useGet(`/sections/${sectionId}`)
+  const semesterId = sectionRes.data.semester_id
+
+  // Load subjects (course + sem + year level)
+  const subjRes = await useGet(
+    `/courses/${courseId}/filtered-subjects?semester_id=${semesterId}&year_level=${yearLevel}`
+  )
+  subjectOptions.value = subjRes.data.data
+
+  // Load professors filtered by department
+  const courseRes = await useGet(`/courses/${courseId}`)
+  const deptId = courseRes.data.department_id
+
+  const profRes = await useGet(`/professors/by-department/${deptId}`)
+  professorOptions.value = profRes.data.data
+
+  // Load all buildings
+  const roomsRes = await useGet(`/rooms`)
+  buildingOptions.value = [
+    ...new Set<string>(
+      roomsRes.data.data.map((r: RoomOption) => r.building_name)
+    )
+  ]
+
+  // Load specific rooms when building is already set
+  if (editForm.value.building) {
+    const roomRes = await useGet(`/rooms/by-building/${editForm.value.building}`)
+    roomOptions.value = roomRes.data.data
+  }
+
+  // Generate time list (5-minute increments)
+  generateTimeOptions()
+}
+
+const editConflict = ref({
+  conflict: false,
+  time_conflict: false,
+  capacity_conflict: false,
+})
+
+watch(
+  [
+    () => editForm.value.professor_id,
+    () => editForm.value.room_id,
+    () => editForm.value.day_of_week,
+    () => editForm.value.start_time,
+    () => editForm.value.end_time
+  ],
+  async () => {
+    if (!editForm.value.start_time || !editForm.value.end_time || !editForm.value.day_of_week) return;
+
+    const payload = {
+      professor_id: editForm.value.professor_id,
+      room_id: editForm.value.room_id,
+      class_section_id: editForm.value.section_id,
+      day_of_week: editForm.value.day_of_week,
+      start_time: editForm.value.start_time,
+      end_time: editForm.value.end_time,
+    }
+
+    const res = await usePost('/schedules/check-conflict', payload)
+    editConflict.value = res.data
+  }
+)
+
+
+function generateTimeOptions() {
+  const list = []
+  const start = 7 * 60
+  const end = 19 * 60
+
+  for (let m = start; m <= end; m += 5) {
+    const hh = String(Math.floor(m / 60)).padStart(2, '0')
+    const mm = String(m % 60).padStart(2, '0')
+    list.push(`${hh}:${mm}`)
+  }
+
+  timeOptions.value = list
+}
+
+watch(() => editForm.value.building, async newVal => {
+  if (newVal) {
+    const roomRes = await useGet(`/rooms/by-building/${newVal}`)
+    roomOptions.value = roomRes.data.data
+  } else {
+    roomOptions.value = []
+  }
+})
 
 // ------------------- COMPUTE LAYOUT & OVERLAP GROUPS -------------------
 function computeLayout() {
@@ -178,25 +389,28 @@ function computeLayout() {
     // sort by start time first
     events.sort((a, b) => a.start - b.start || a.end - b.end)
 
-    // 3️⃣ Merge overlapping events
-    const merged: CalendarEvent[] = []
-    let current = { ...events[0] }
+    const merged = events
 
-    for (let i = 1; i < events.length; i++) {
-      const next = events[i]
-      // if overlaps or touches current range
-      if (next.start < current.end) {
-        // merge them
-        current.end = Math.max(current.end, next.end)
-        current.count += next.count
-        current.classes = [...(current.classes || []), ...(next.classes || [])]
-      }
-      else {
-        merged.push(current)
-        current = { ...next }
-      }
-    }
-    merged.push(current)
+    // // 3️⃣ Merge overlapping events
+    // const merged: CalendarEvent[] = []
+    // let current = { ...events[0] }
+
+    // for (let i = 1; i < events.length; i++) {
+    //   const next = events[i]
+    //   // if overlaps or touches current range
+    //   if (next.start < current.end) {
+    //     // merge them
+    //     current.end = Math.max(current.end, next.end)
+    //     current.count += next.count
+    //     current.classes = [...(current.classes || []), ...(next.classes || [])]
+    //   }
+    //   else {
+    //     merged.push(current)
+    //     current = { ...next }
+    //   }
+    // }
+
+    //merged.push(current)
 
     // 4️⃣ Treat each merged block as a single group (no overlap)
     const positionedDay: CalendarEvent[] = []
@@ -290,23 +504,34 @@ async function handleFilters(data: FilterInterface) {
     daysGridRef.value.scrollTop = 0
 }
 
-// event click behavior
-function onEventClick(ev: CalendarEvent) {
-  // if the CalendarEvent corresponds to a single schedule entry and that schedule has exactly 1 class
-  if (ev.classes.length === 1 && ev.count === 1) {
-    // single class: open drawer in edit form mode for that class
-    drawerTitle.value = `Edit — ${ev.classes[0].title}`
-    drawerData.value = [ev]
-    drawerMode.value = 'edit-single'
-    drawerVisible.value = true
+async function onEventClick(ev: CalendarEvent) {
+  const cls = ev.classes[0] // since edit-single only triggers here
+
+  // Load schedule details from backend
+  const res = await useGet(`/schedules/${cls.id}`)
+  const sched = res.data
+
+  // Fill edit form
+  editForm.value = {
+    id: sched.id,
+    subject_id: sched.subject_id,
+    professor_id: sched.professor_id,
+    building: sched.room?.building_name || null,
+    room_id: sched.room_id,
+    day_of_week: sched.day_of_week,
+    start_time: sched.start_time?.slice(0, 5),
+    end_time: sched.end_time?.slice(0, 5),
+    section_id: sched.class_section_id,
+    course_id: sched.class_section?.course_id,
+    year_level: sched.class_section?.year_level,
   }
-  else {
-    // single timeslot but multiple classes (same start/end but multiple classes)
-    drawerTitle.value = `${formatTimeRange(ev.start, ev.end)} — ${ev.classes.length} classes`
-    drawerData.value = [ev]
-    drawerMode.value = 'list-single-timeslot'
-    drawerVisible.value = true
-  }
+
+  await loadEditFormDropdowns()
+
+  drawerTitle.value = `Edit — ${cls.title}`
+  drawerData.value = [ev]
+  drawerMode.value = 'edit-single'
+  drawerVisible.value = true
 }
 
 // when user clicks the "+N more" summary for a specific overlap group
@@ -333,14 +558,32 @@ function openEditModalForClass(c: ClassItem) {
 }
 
 // handle edit save (dummy; replace with actual save)
-function saveEditedClass(payload: ClassItem) {
-  // implement your API call here
+async function saveEditedClass() {
+  if (editConflict.value.conflict) {
+    return message.error("Cannot save. There are schedule conflicts.")
+  }
 
-  message.success(`Saved (simulate)${payload.start_time} - ${payload.end_time}`)
+  const id = editForm.value.id
+
+  const payload = {
+    subject_id: editForm.value.subject_id,
+    professor_id: editForm.value.professor_id,
+    room_id: editForm.value.room_id,
+    day_of_week: editForm.value.day_of_week,
+    start_time: editForm.value.start_time,
+    end_time: editForm.value.end_time,
+    status: "Finalized",
+  }
+
+  const res = await usePut(`/schedules/${id}`, payload)
+
+  message.success("Schedule updated." + res.data.message)
   editModalVisible.value = false
-  // refresh schedules after save
+  drawerVisible.value = false
+
   fetchSchedules()
 }
+
 
 // on drawer close
 function closeDrawer() {
@@ -433,9 +676,6 @@ watch(positionedEvents, () => updateCompactView(), { deep: true })
     <h1 class="text-2xl font-semibold tracking-wide">
       Class Scheduler
     </h1>
-    <a-button type="primary" class="!bg-blue-600 hover:!bg-blue-700 font-medium rounded-xl shadow-md">
-      + Add Schedule
-    </a-button>
   </div>
 
   <!-- Filters -->
@@ -473,10 +713,8 @@ watch(positionedEvents, () => updateCompactView(), { deep: true })
         <div class="days-row" :style="{ height: `${totalGridHeight}px` }">
           <div v-for="(day) in displayDays" :key="day.key" class="day-column" :style="{ width: `${dayColumnWidth}%` }">
             <!-- background rows -->
-            <div
-              v-for="slot in timeSlots" :key="`bg-${day.key}-${slot}`" class="bg-slot"
-              :style="{ height: `${slotHeightPx}px` }"
-            />
+            <div v-for="slot in timeSlots" :key="`bg-${day.key}-${slot}`" class="bg-slot"
+              :style="{ height: `${slotHeightPx}px` }" />
 
             <!-- Render overlap groups and events -->
             <div class="events-container">
@@ -484,20 +722,16 @@ watch(positionedEvents, () => updateCompactView(), { deep: true })
               <template v-for="(group, gi) in dayRenderData[day.key].groups">
                 <!-- if group length < 3: render each event normally -->
                 <template v-if="group[0].classes.length < 3">
-                  <div
-                    v-for="ev in group" :key="ev.id" :ref="el => eventRefs.push(el as HTMLElement)" class="event"
-                    :style="eventStyle(ev)"
-                  >
-                    <a-tooltip
-                      v-if="ev.count > 1" :title="ev.classes.map(c => c.title).slice(0, 5).join('; ')"
-                      placement="top"
-                    >
+                  <div v-for="ev in group" :key="ev.id" :ref="el => eventRefs.push(el as HTMLElement)" class="event"
+                    :style="eventStyle(ev)">
+                    <a-tooltip v-if="ev.count > 1" :title="ev.classes.map(c => c.title).slice(0, 5).join('; ')"
+                      placement="top">
                       <div class="event-card clickable" @click="onEventClick(ev)">
                         <div class="event-title">
                           {{ ev.classes[0]?.title }}
                         </div>
                         <div class="event-sections">
-                          {{ ev.classes.slice(0, 2).map(c => c.section).join(', ') }}
+                          {{ev.classes.slice(0, 2).map(c => c.section).join(', ')}}
                         </div>
                         <div v-if="ev.count > 1" class="event-extra">
                           {{ ev.count - 1 }} more {{ ev.count - 1 === 1 ? 'class' : 'classes' }}
@@ -509,7 +743,7 @@ watch(positionedEvents, () => updateCompactView(), { deep: true })
                         {{ ev.classes[0]?.title }}
                       </div>
                       <div class="event-sections">
-                        {{ ev.classes.slice(0, 2).map(c => c.section).join(', ') }}
+                        {{ev.classes.slice(0, 2).map(c => c.section).join(', ')}}
                       </div>
                       <div v-if="ev.count > 1" class="event-extra">
                         {{ ev.count - 1 }} more
@@ -520,20 +754,16 @@ watch(positionedEvents, () => updateCompactView(), { deep: true })
 
                 <!-- if group length >= 3: show first 2 normally and a summary badge -->
                 <template v-else>
-                  <div
-                    v-for="(ev) in group.slice(0, 2)" :key="ev.id" :ref="el => eventRefs.push(el as HTMLElement)"
-                    class="event" :style="eventStyle(ev)"
-                  >
-                    <a-tooltip
-                      v-if="ev.count > 1" :title="ev.classes.map(c => c.title).slice(0, 5).join('; ')"
-                      placement="top"
-                    >
+                  <div v-for="(ev) in group.slice(0, 2)" :key="ev.id" :ref="el => eventRefs.push(el as HTMLElement)"
+                    class="event" :style="eventStyle(ev)">
+                    <a-tooltip v-if="ev.count > 1" :title="ev.classes.map(c => c.title).slice(0, 5).join('; ')"
+                      placement="top">
                       <div class="event-card clickable" @click="onGroupSummaryClick(day.key, gi)">
                         <div class="event-title">
                           {{ ev.classes[0]?.title }}
                         </div>
                         <div class="event-sections">
-                          {{ ev.classes.slice(0, 2).map(c => c.section).join(', ') }}
+                          {{ev.classes.slice(0, 2).map(c => c.section).join(', ')}}
                         </div>
                         <div v-if="ev.count > 1" class="event-extra">
                           {{ ev.count - 1 }} more
@@ -561,30 +791,87 @@ watch(positionedEvents, () => updateCompactView(), { deep: true })
     </div>
 
     <!-- Drawer for group / list / edit -->
-    <a-drawer
-      v-model:open="drawerVisible" :title="drawerTitle" placement="right" width="480" :mask-closable="true"
-      @close="closeDrawer"
-    >
+    <a-drawer v-model:open="drawerVisible" :title="drawerTitle" placement="right" width="480" :mask-closable="true"
+      @close="closeDrawer">
       <!-- Modes -->
       <div v-if="drawerMode === 'edit-single' && drawerData.length">
-        <h3>Edit Class</h3>
+
         <a-form layout="vertical">
-          <a-form-item label="Title">
-            <a-input v-model:value="drawerData[0].classes[0].title" />
+
+          <a-form-item label="Subject">
+            <a-select v-model:value="editForm.subject_id" style="width:100%">
+              <a-select-option v-for="s in subjectOptions" :value="s.id" :key="s.id">
+                {{ s.subject_code }} — {{ s.subject_name }}
+              </a-select-option>
+            </a-select>
           </a-form-item>
+
           <a-form-item label="Professor">
-            <a-input v-model:value="drawerData[0].classes[0].professor" />
+            <a-select v-model:value="editForm.professor_id" style="width:100%">
+              <a-select-option v-for="p in professorOptions" :value="p.id" :key="p.id">
+                {{ p.last_name }}, {{ p.first_name }}
+              </a-select-option>
+            </a-select>
           </a-form-item>
+
+          <a-form-item label="Building">
+            <a-select v-model:value="editForm.building" style="width:100%">
+              <a-select-option v-for="b in buildingOptions" :value="b" :key="b">
+                {{ b }}
+              </a-select-option>
+            </a-select>
+          </a-form-item>
+
           <a-form-item label="Room">
-            <a-input v-model:value="drawerData[0].classes[0].room" />
+            <a-select v-model:value="editForm.room_id" style="width:100%">
+              <a-select-option v-for="r in roomOptions" :key="r.id" :value="r.id">
+                {{ r.room_number }} — cap: {{ r.capacity }}
+              </a-select-option>
+            </a-select>
           </a-form-item>
-          <a-form-item>
-            <a-button type="primary" @click="() => { saveEditedClass(drawerData[0].classes[0]); closeDrawer(); }">
-              Save
-            </a-button>
+
+          <a-form-item label="Day">
+            <a-select v-model:value="editForm.day_of_week" style="width:100%">
+              <a-select-option v-for="d in displayDays" :value="d.key" :key="d.key">
+                {{ d.key }}
+              </a-select-option>
+            </a-select>
           </a-form-item>
+
+          <a-row :gutter="12">
+            <a-col :span="12">
+              <a-form-item label="Start Time">
+                <a-select v-model:value="editForm.start_time">
+                  <a-select-option v-for="t in timeOptions" :key="t" :value="t">
+                    {{ t }}
+                  </a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col :span="12">
+              <a-form-item label="End Time">
+                <a-select v-model:value="editForm.end_time">
+                  <a-select-option v-for="t in timeOptions" :key="t" :value="t">
+                    {{ t }}
+                  </a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+          </a-row>
+
+          <a-alert v-if="editConflict.conflict" type="error"
+            :message="editConflict.capacity_conflict ? 'Room capacity exceeded.' : 'Schedule conflict detected.'"
+            show-icon />
+
+          <a-button type="primary" :disabled="editConflict.conflict" @click="saveEditedClass" block>
+            Save Changes
+          </a-button>
+
         </a-form>
+
       </div>
+
+
 
       <div v-else-if="drawerMode === 'list-single-timeslot' && drawerData.length">
         <!-- single timeslot but multiple classes: display table -->
@@ -593,29 +880,21 @@ watch(positionedEvents, () => updateCompactView(), { deep: true })
           <a-table-column title="Section" :custom-render="({ record }: any) => record.section || '-'" />
           <a-table-column title="Professor" data-index="professor" />
           <a-table-column title="Room" data-index="room" />
-          <a-table-column
-            title="Actions"
-            :custom-render="({ record }: any) => h('a', { onClick: () => openEditModalForClass(record) }, 'Edit')"
-          />
+          <a-table-column title="Actions"
+            :custom-render="({ record }: any) => h('a', { onClick: () => openEditModalForClass(record) }, 'Edit')" />
         </a-table>
       </div>
 
       <div v-else-if="drawerMode === 'multi-timeslot' && drawerData.length">
         <a-collapse accordion>
-          <a-collapse-panel
-            v-for="panelEvents in drawerPanelGroups"
-            :key="panelEvents.key"
-            :header="panelEvents.key"
-          >
+          <a-collapse-panel v-for="panelEvents in drawerPanelGroups" :key="panelEvents.key" :header="panelEvents.key">
             <a-table :data-source="panelEvents.classes" :pagination="false" row-key="id" size="small">
               <a-table-column title="Title" data-index="title" />
               <a-table-column title="Section" :custom-render="({ record }: any) => record.section || '-'" />
               <a-table-column title="Professor" data-index="professor" />
               <a-table-column title="Room" data-index="room" />
-              <a-table-column
-                title="Actions"
-                :custom-render="({ record }: any) => h('a', { onClick: () => openEditModalForClass(record) }, 'Edit')"
-              />
+              <a-table-column title="Actions"
+                :custom-render="({ record }: any) => h('a', { onClick: () => openEditModalForClass(record) }, 'Edit')" />
             </a-table>
           </a-collapse-panel>
         </a-collapse>
@@ -623,10 +902,8 @@ watch(positionedEvents, () => updateCompactView(), { deep: true })
     </a-drawer>
 
     <!-- Edit modal (for editing a single class row) -->
-    <a-modal
-      v-model:visible="editModalVisible" title="Edit Class"
-      @ok="() => { if (editModalData) saveEditedClass(editModalData); }" @cancel="() => (editModalVisible = false)"
-    >
+    <a-modal v-model:visible="editModalVisible" title="Edit Class"
+      @ok="saveEditedClass" @cancel="() => (editModalVisible = false)">
       <div v-if="editModalData">
         <a-form layout="vertical">
           <a-form-item label="Title">
@@ -638,6 +915,19 @@ watch(positionedEvents, () => updateCompactView(), { deep: true })
           <a-form-item label="Room">
             <a-input v-model:value="editModalData.room" />
           </a-form-item>
+          <a-form-item label="Start Time">
+            <a-select v-model:value="editModalData.start_time">
+              <a-select-option v-for="t in timeOptions" :key="t" :value="t">{{ t }}</a-select-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item label="End Time">
+            <a-select v-model:value="editModalData.end_time">
+              <a-select-option v-for="t in timeOptions" :key="t" :value="t">{{ t }}</a-select-option>
+            </a-select>
+          </a-form-item>
+
+
+
         </a-form>
       </div>
     </a-modal>
@@ -872,6 +1162,7 @@ watch(positionedEvents, () => updateCompactView(), { deep: true })
 }
 
 @media (max-width: 900px) {
+
   .day-cell,
   .day-column {
     min-width: 180px;

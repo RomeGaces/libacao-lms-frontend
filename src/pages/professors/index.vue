@@ -245,7 +245,7 @@ onMounted(() => {
       <a-pagination :current="pagination.current" :total="pagination.total" :page-size="pagination.pageSize"
         :show-size-changer="true" :show-total="(total: number) => `Total ${total} professors`"
         @change="handlePageChange"
-        @show-size-change="(current, size) => { pagination.pageSize = size; fetchData(current) }" />
+        @show-size-change="(current: number | undefined, size: number) => { pagination.pageSize = size; fetchData(current) }" />
     </div>
 
     <!-- Form Modal -->

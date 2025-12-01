@@ -178,7 +178,7 @@ const columns = computed(() => [
         <!-- Pagination -->
         <div class="flex justify-end mt-3">
             <a-pagination :current="pagination.current" :total="pagination.total" :pageSize="pagination.pageSize"
-                @change="(p) => { pagination.current = p; loadStudents() }" />
+                @change="(p: number) => { pagination.current = p; loadStudents() }" />
         </div>
 
         <!-- Modals / Drawers -->

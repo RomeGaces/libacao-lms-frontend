@@ -12,6 +12,7 @@ declare global {
   const asyncComputed: typeof import('@vueuse/core')['asyncComputed']
   const autoResetRef: typeof import('@vueuse/core')['autoResetRef']
   const breakpointsEnum: typeof import('../src/composables/query-breakpoints')['breakpointsEnum']
+  const buildQueryParams: typeof import('../src/composables/utils')['buildQueryParams']
   const computed: typeof import('vue')['computed']
   const computedAsync: typeof import('@vueuse/core')['computedAsync']
   const computedEager: typeof import('@vueuse/core')['computedEager']
@@ -38,6 +39,8 @@ declare global {
   const eagerComputed: typeof import('@vueuse/core')['eagerComputed']
   const effectScope: typeof import('vue')['effectScope']
   const extendRef: typeof import('@vueuse/core')['extendRef']
+  const formatHour: typeof import('../src/composables/utils')['formatHour']
+  const formatTimeRange: typeof import('../src/composables/utils')['formatTimeRange']
   const getActivePinia: typeof import('pinia')['getActivePinia']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
   const getCurrentScope: typeof import('vue')['getCurrentScope']
@@ -59,6 +62,7 @@ declare global {
   const mapStores: typeof import('pinia')['mapStores']
   const mapWritableState: typeof import('pinia')['mapWritableState']
   const markRaw: typeof import('vue')['markRaw']
+  const minutesToTimeString: typeof import('../src/composables/utils')['minutesToTimeString']
   const nextTick: typeof import('vue')['nextTick']
   const onActivated: typeof import('vue')['onActivated']
   const onBeforeMount: typeof import('vue')['onBeforeMount']
@@ -80,6 +84,7 @@ declare global {
   const onUnmounted: typeof import('vue')['onUnmounted']
   const onUpdated: typeof import('vue')['onUpdated']
   const onWatcherCleanup: typeof import('vue')['onWatcherCleanup']
+  const parseTimeToMinutes: typeof import('../src/composables/utils')['parseTimeToMinutes']
   const pausableWatch: typeof import('@vueuse/core')['pausableWatch']
   const preferredLanguages: typeof import('../src/composables/i18n-locale')['preferredLanguages']
   const provide: typeof import('vue')['provide']
@@ -159,6 +164,7 @@ declare global {
   const useCloned: typeof import('@vueuse/core')['useCloned']
   const useColorMode: typeof import('@vueuse/core')['useColorMode']
   const useCompConsumer: typeof import('../src/composables/comp-consumer')['useCompConsumer']
+  const useCompactMode: typeof import('../src/composables/useCompactMode')['useCompactMode']
   const useConfirmDialog: typeof import('@vueuse/core')['useConfirmDialog']
   const useCounter: typeof import('@vueuse/core')['useCounter']
   const useCssModule: typeof import('vue')['useCssModule']
@@ -263,6 +269,10 @@ declare global {
   const useResizeObserver: typeof import('@vueuse/core')['useResizeObserver']
   const useRoute: typeof import('vue-router')['useRoute']
   const useRouter: typeof import('vue-router')['useRouter']
+  const useScheduleFetch: typeof import('../src/composables/useScheduleFetch')['useScheduleFetch']
+  const useScheduleInteractions: typeof import('../src/composables/useScheduleInteractions')['useScheduleInteractions']
+  const useScheduleLayout: typeof import('../src/composables/useScheduleLayout')['useScheduleLayout']
+  const useScheduleTimeRange: typeof import('../src/composables/useScheduleTimeRange')['useScheduleTimeRange']
   const useScreenOrientation: typeof import('@vueuse/core')['useScreenOrientation']
   const useScreenSafeArea: typeof import('@vueuse/core')['useScreenSafeArea']
   const useScriptTag: typeof import('@vueuse/core')['useScriptTag']
@@ -347,4 +357,7 @@ declare global {
   // @ts-ignore
   export type { TablePaginationProps, TableRowSelectionsProps, TableQueryOptions } from '../src/composables/table-query'
   import('../src/composables/table-query')
+  // @ts-ignore
+  export type { FilterInterface, ClassItem, BackendSchedule, CalendarEvent, DayEventsMap, DayGroupsMap } from '../src/composables/types'
+  import('../src/composables/types')
 }
