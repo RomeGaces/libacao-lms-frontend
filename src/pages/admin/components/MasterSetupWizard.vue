@@ -5,9 +5,9 @@ import StepAYConfig from './StepAYConfig.vue'
 import StepDryRun from './StepDryRun.vue'
 import StepExecute from './StepExecute.vue'
 
-const props = defineProps({
-  visible: Boolean
-})
+const { visible } = defineProps<{
+  visible: boolean
+}>()
 
 const emit = defineEmits(['update:visible', 'completed'])
 
@@ -42,33 +42,21 @@ function onExecuted() {
 <template>
   <a-modal :visible="visible" @cancel="close" :footer="null" width="800px">
     <a-steps :current="currentStep" class="mb-5">
-      <a-step title="Academic Year Config"/>
-      <a-step title="Dry Run Preview"/>
-      <a-step title="Execute"/>
+      <a-step title="Academic Year Config" />
+      <a-step title="Dry Run Preview" />
+      <a-step title="Execute" />
     </a-steps>
 
     <div v-show="currentStep === 0">
-      <StepAYConfig
-        :form="form"
-        @next="currentStep = 1"
-      />
+      <StepAYConfig :form="form" @next="currentStep = 1" />
     </div>
 
     <div v-show="currentStep === 1">
-      <StepDryRun
-        :form="form"
-        @back="currentStep = 0"
-        @dry-run-complete="onDryRun"
-      />
+      <StepDryRun :form="form" @back="currentStep = 0" @dry-run-complete="onDryRun" />
     </div>
 
     <div v-show="currentStep === 2">
-      <StepExecute
-        :form="form"
-        :dryRunData="dryRunData"
-        @back="currentStep = 1"
-        @done="onExecuted"
-      />
+      <StepExecute :form="form" :dryRunData="dryRunData" @back="currentStep = 1" @done="onExecuted" />
     </div>
   </a-modal>
 </template>

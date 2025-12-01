@@ -88,7 +88,7 @@ const columns = computed(() => [
     placement="right"
     width="500"
     :open="visible"
-    @close="$emit('update:visible', false)"
+    @close="emit('update:visible', false)"
   >
 
     <!-- Student Header -->

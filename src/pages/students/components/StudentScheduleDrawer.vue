@@ -82,7 +82,7 @@ const columns = computed(() => [
 
 <template>
     <a-drawer title="Student Schedule" placement="right" width="460" :open="visible"
-        @close="$emit('update:visible', false)">
+         @close="emit('update:visible', false)">
         <a-table :columns="columns" :data-source="schedule" :pagination="false" row-key="id" bordered>
 
             <!-- GLOBAL Cell Renderer -->
