@@ -1,0 +1,112 @@
+# --------------------------------------------------------
+# Laravel
+# --------------------------------------------------------
+
+/vendor/
+/node_modules/
+
+# Laravel environment files
+.env
+.env.*
+!.env.example
+
+# Laravel cache & compiled files
+/public/hot
+/public/storage
+/storage/*.key
+/storage/app/public
+/storage/framework/cache/data
+/storage/framework/sessions
+/storage/framework/views
+/storage/logs
+
+# Laravel testing
+/phpunit.xml
+.phpunit.result.cache
+
+# IDE helper files
+/_ide_helper.php
+/_ide_helper_models.php
+/.phpstorm.meta.php
+
+# Composer lock (optional)
+# composer.lock
+
+# --------------------------------------------------------
+# Vue 3 / Vite
+# --------------------------------------------------------
+
+# Node dependencies
+frontend/node_modules/
+node_modules/
+
+# Build output
+/public/build
+/dist
+/dist-ssr
+*.local
+
+# Vite local env
+*.env.local
+*.env.development.local
+*.env.production.local
+*.env.test.local
+
+# --------------------------------------------------------
+# OS / Editor junk
+# --------------------------------------------------------
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# -----------------------------------------------------------------------------
+# IDE / Editor
+# -----------------------------------------------------------------------------
+
+# VSCode
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# PHPStorm / JetBrains
+.idea/
+
+# Sublime
+*.sublime-workspace
+*.sublime-project
+
+# --------------------------------------------------------
+# Docker (if used)
+# --------------------------------------------------------
+docker-compose.override.yml
+
+# --------------------------------------------------------
+# Misc
+# --------------------------------------------------------
+# compiled assets (if using mix)
+public/js/*
+public/css/*
+public/mix-manifest.json
+
+# lockfiles (optional depending on your workflow)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
