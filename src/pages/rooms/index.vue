@@ -44,6 +44,7 @@ async function fetchData(page = pagination.current) {
       page,
       per_page: pagination.pageSize,
     })
+
     rooms.value = data.data
     pagination.current = data.current_page
     pagination.total = data.total
@@ -61,18 +62,28 @@ function handleSearch() {
 function openForm(record: any | null = null) {
   selected.value = record
   Object.keys(form).forEach(k => delete form[k])
-  if (record)
-    Object.assign(form, record)
+
+  if (record) {
+    form.room_number = record.room_number
+    form.building_name = record.building_name
+    form.capacity = record.capacity
+    form.type = record.type
+  }
 
   formVisible.value = true
 }
 
 async function handleSubmit() {
   try {
-    const payload = { ...form }
+    const payload = {
+      room_number: form.room_number,
+      building_name: form.building_name,
+      capacity: form.capacity,
+      type: form.type,
+    }
 
     if (selected.value)
-      await operations.update('rooms', selected.value.room_id, payload)
+      await operations.update('rooms', selected.value.id, payload) // FIXED ✔
     else
       await operations.create('rooms', payload)
 
@@ -80,14 +91,15 @@ async function handleSubmit() {
     formVisible.value = false
     await fetchData()
   }
-  catch {
+  catch (e) {
+    console.error(e)
     message.error('Error saving record')
   }
 }
 
 async function handleDelete(record: any) {
   try {
-    await operations.remove('rooms', record.room_id)
+    await operations.remove('rooms', record.id) // FIXED ✔
     message.success('Deleted successfully!')
     await fetchData()
   }
@@ -110,37 +122,21 @@ onMounted(() => {
   <div>
     <!-- Search & Add -->
     <a-space style="margin-bottom:16px; width:100%">
-      <a-input-search
-        v-model:value="search"
-        placeholder="Search rooms..."
-        enter-button
-        style="max-width:300px"
-        @search="handleSearch"
-      />
+      <a-input-search v-model:value="search" placeholder="Search rooms..." enter-button style="max-width:300px"
+        @search="handleSearch" />
       <a-button type="primary" @click="openForm()">
         Add Room
       </a-button>
     </a-space>
 
     <!-- List -->
-    <a-table
-      :columns="columns"
-      :data-source="rooms"
-      :loading="loading"
-      row-key="room_id"
-      bordered
-      :pagination="false"
-    >
+
+    <a-table :columns="columns" :data-source="rooms" row-key="id" bordered :pagination="false">
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'actions'">
           <a-space>
             <a @click="openForm(record)">Edit</a>
-            <a-popconfirm
-              title="Delete this room?"
-              ok-text="Yes"
-              cancel-text="No"
-              @confirm="handleDelete(record)"
-            >
+            <a-popconfirm title="Delete this room?" ok-text="Yes" cancel-text="No" @confirm="handleDelete(record)">
               <a>Delete</a>
             </a-popconfirm>
           </a-space>
@@ -153,50 +149,29 @@ onMounted(() => {
 
     <!-- Pagination -->
     <div style="margin-top:16px; text-align:right">
-      <a-pagination
-        :current="pagination.current"
-        :total="pagination.total"
-        :page-size="pagination.pageSize"
-        :show-total="(total: number) => `Total ${total} rooms`"
-        @change="handlePageChange"
-      />
+      <a-pagination :current="pagination.current" :total="pagination.total" :page-size="pagination.pageSize"
+        :show-total="(total: number) => `Total ${total} rooms`" @change="handlePageChange" />
     </div>
 
     <!-- Form Modal -->
-    <a-modal
-      v-model:open="formVisible"
-      :title="selected ? 'Edit Room' : 'Add Room'"
-      destroy-on-close
-      @ok="handleSubmit"
-    >
+    <a-modal v-model:open="formVisible" :title="selected ? 'Edit Room' : 'Add Room'" destroy-on-close
+      @ok="handleSubmit">
       <a-form ref="formRef" :model="form" layout="vertical">
         <a-row :gutter="16">
           <a-col :span="12">
-            <a-form-item
-              label="Room Number"
-              name="room_number"
-              :rules="req('Room Number')"
-            >
+            <a-form-item label="Room Number" name="room_number" :rules="req('Room Number')">
               <a-input v-model:value="form.room_number" />
             </a-form-item>
           </a-col>
           <a-col :span="12">
-            <a-form-item
-              label="Building Name"
-              name="building_name"
-              :rules="req('Building Name')"
-            >
+            <a-form-item label="Building Name" name="building_name" :rules="req('Building Name')">
               <a-input v-model:value="form.building_name" />
             </a-form-item>
           </a-col>
         </a-row>
 
         <a-form-item label="Capacity" name="capacity">
-          <a-input-number
-            v-model:value="form.capacity"
-            :min="0"
-            style="width:100%"
-          />
+          <a-input-number v-model:value="form.capacity" :min="0" style="width:100%" />
         </a-form-item>
 
         <a-form-item label="Type" name="type">

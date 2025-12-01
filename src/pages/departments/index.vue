@@ -39,11 +39,11 @@ async function fetchData(page = pagination.current) {
       page,
       per_page: pagination.pageSize,
     })
+
     departments.value = data.data
     pagination.current = data.current_page
     pagination.total = data.total
-  }
-  finally {
+  } finally {
     loading.value = false
   }
 }
@@ -56,37 +56,47 @@ function handleSearch() {
 function openForm(record: any | null = null) {
   selected.value = record
   Object.keys(form).forEach(k => delete form[k])
-  if (record)
-    Object.assign(form, record)
+
+  if (record) {
+    form.department_code = record.department_code
+    form.department_name = record.department_name
+    form.office_location = record.office_location
+    form.contact_email = record.contact_email
+    form.contact_number = record.contact_number
+  }
 
   formVisible.value = true
 }
 
 async function handleSubmit() {
   try {
-    const payload = { ...form }
+    const payload = {
+      department_code: form.department_code,
+      department_name: form.department_name,
+      office_location: form.office_location,
+      contact_email: form.contact_email,
+      contact_number: form.contact_number,
+    }
 
     if (selected.value)
-      await operations.update('departments', selected.value.department_id, payload)
+      await operations.update('departments', selected.value.id, payload)  // FIXED ✔
     else
       await operations.create('departments', payload)
 
     message.success('Saved successfully!')
     formVisible.value = false
     await fetchData()
-  }
-  catch (e) {
+  } catch (e) {
     message.error('Error saving record')
   }
 }
 
 async function handleDelete(record: any) {
   try {
-    await operations.remove('departments', record.department_id)
+    await operations.remove('departments', record.id) // FIXED ✔
     message.success('Deleted successfully!')
     await fetchData()
-  }
-  catch {
+  } catch {
     message.error('Error deleting record')
   }
 }
@@ -122,7 +132,7 @@ onMounted(() => {
       :columns="columns"
       :data-source="departments"
       :loading="loading"
-      row-key="department_id"
+      row-key="id"
       bordered
       :pagination="false"
     >

@@ -2,7 +2,7 @@
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
 import { onMounted, reactive, ref } from 'vue'
-import { operations } from '~@/api/crud-operations'
+import { operations } from '@/api/crud-operations'
 
 const professors = ref<any[]>([])
 const departments = ref<{ label: string, value: number }[]>([])
@@ -13,6 +13,12 @@ const formVisible = ref(false)
 const selected = ref<any | null>(null)
 const form = reactive<any>({})
 const formRef = ref()
+
+const schedulesDrawerVisible = ref(false)
+const schedules = ref<any[]>([])
+const selectedProfessor = ref<any | null>(null)
+const schedulesLoading = ref(false)
+
 const resource = 'professors'
 
 const defaultForm = {
@@ -28,7 +34,7 @@ const defaultForm = {
   department_id: null,
 }
 
-// Pagination state
+// Pagination
 const pagination = reactive({
   current: 1,
   total: 0,
@@ -68,7 +74,6 @@ async function fetchData(page = pagination.current) {
       page,
       per_page: pagination.pageSize,
     })
-    // Response structure matches updated backend controller
     professors.value = res.data.data
     pagination.current = res.data.current_page
     pagination.total = res.data.total
@@ -79,7 +84,7 @@ async function fetchData(page = pagination.current) {
 }
 
 function handleSearch() {
-  pagination.current = 1 // reset to first page when searching
+  pagination.current = 1
   fetchData()
 }
 
@@ -87,13 +92,40 @@ async function fetchDepartments() {
   departmentsLoading.value = true
   try {
     const res = await operations.list('departments')
-    departments.value = res.data.map((d: any) => ({
+    departments.value = res.data.data.map((d: any) => ({
       label: `${d.department_code} - ${d.department_name}`,
-      value: d.department_id,
+      value: d.id, // FIXED ✔
     }))
   }
   finally {
     departmentsLoading.value = false
+  }
+}
+
+async function openSchedulesDrawer(record: any) {
+  selectedProfessor.value = record
+  schedulesDrawerVisible.value = true
+  schedulesLoading.value = true
+
+  try {
+    const res = await operations.list('schedules', {
+      professor_id: record.id, // backend supports this ✔
+    })
+
+    schedules.value = res.data.flatMap((block: any) =>
+      block.classes.map((cls: any) => ({
+        id: cls.id,
+        title: cls.title,
+        section: cls.section,
+        room: cls.room,
+        day_of_week: cls.day_of_week,
+        start_time: cls.start_time,
+        end_time: cls.end_time,
+      })),
+    )
+  }
+  finally {
+    schedulesLoading.value = false
   }
 }
 
@@ -102,9 +134,18 @@ function openForm(record: any | null = null) {
   selected.value = record
 
   if (record) {
-    Object.assign(form, record)
-    if (record.hire_date)
-      form.hire_date = dayjs(record.hire_date)
+    Object.assign(form, {
+      first_name: record.first_name,
+      last_name: record.last_name,
+      middle_name: record.middle_name,
+      gender: record.gender,
+      email: record.email,
+      phone_number: record.phone_number,
+      specialization: record.specialization,
+      status: record.status,
+      department_id: record.department_id,
+      hire_date: record.hire_date ? dayjs(record.hire_date) : null,
+    })
   }
 
   formVisible.value = true
@@ -112,12 +153,21 @@ function openForm(record: any | null = null) {
 
 async function handleSubmit() {
   try {
-    const payload = { ...form }
-    if (payload.hire_date?.format)
-      payload.hire_date = payload.hire_date.format('YYYY-MM-DD')
+    const payload = {
+      first_name: form.first_name,
+      last_name: form.last_name,
+      middle_name: form.middle_name,
+      gender: form.gender,
+      email: form.email,
+      phone_number: form.phone_number,
+      specialization: form.specialization,
+      status: form.status,
+      department_id: form.department_id,
+      hire_date: form.hire_date ? form.hire_date.format('YYYY-MM-DD') : null,
+    }
 
     if (selected.value)
-      await operations.update(resource, selected.value.professor_id, payload)
+      await operations.update(resource, selected.value.id, payload) // FIXED ✔
     else
       await operations.create(resource, payload)
 
@@ -125,19 +175,20 @@ async function handleSubmit() {
     formVisible.value = false
     await fetchData()
   }
-  catch {
+  catch (e) {
+    console.error(e)
     message.error('Error saving record')
   }
 }
 
 async function handleDelete(record: any) {
   try {
-    await operations.remove(resource, record.professor_id)
+    await operations.remove(resource, record.id) // FIXED ✔
     message.success('Deleted successfully!')
     await fetchData()
   }
   catch {
-    message.error('Error deleting record')
+    message.error('Error deleting')
   }
 }
 
@@ -156,43 +207,27 @@ onMounted(() => {
   <div>
     <!-- Search & Add -->
     <a-space style="margin-bottom:16px; width:100%">
-      <a-input-search
-        v-model:value="search"
-        placeholder="Search professors..."
-        enter-button
-        style="max-width:300px"
-        @search="handleSearch"
-      />
+      <a-input-search v-model:value="search" placeholder="Search professors..." enter-button style="max-width:300px"
+        @search="handleSearch" />
       <a-button type="primary" @click="openForm()">
         Add Professor
       </a-button>
     </a-space>
 
     <!-- List -->
-    <a-table
-      :columns="columns"
-      :data-source="professors"
-      :loading="loading"
-      row-key="professor_id"
-      bordered
-      :pagination="false"
-    >
+    <a-table :columns="columns" :data-source="professors" :loading="loading" row-key="id" bordered :pagination="false">
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'actions'">
           <a-space>
             <a @click="openForm(record)">Edit</a>
-            <a-popconfirm
-              title="Delete this professor?"
-              ok-text="Yes"
-              cancel-text="No"
-              @confirm="handleDelete(record)"
-            >
+            <a @click="openSchedulesDrawer(record)">Schedules</a>
+            <a-popconfirm title="Delete this professor?" ok-text="Yes" cancel-text="No" @confirm="handleDelete(record)">
               <a>Delete</a>
             </a-popconfirm>
           </a-space>
         </template>
         <template v-else-if="column.dataIndex === 'department_name'">
-          {{ record.department?.department_code || '-' }}
+          {{ record.department?.department_name || '-' }} <!-- FIXED ✔ -->
         </template>
         <template v-else-if="column.dataIndex === 'status'">
           <a-tag :color="record.status === 'active' ? 'green' : 'red'">
@@ -207,24 +242,15 @@ onMounted(() => {
 
     <!-- Pagination -->
     <div style="margin-top:16px; text-align:right">
-      <a-pagination
-        :current="pagination.current"
-        :total="pagination.total"
-        :page-size="pagination.pageSize"
-        :show-size-changer="true"
-        :show-total="(total: number) => `Total ${total} professors`"
+      <a-pagination :current="pagination.current" :total="pagination.total" :page-size="pagination.pageSize"
+        :show-size-changer="true" :show-total="(total: number) => `Total ${total} professors`"
         @change="handlePageChange"
-        @show-size-change="(current, size) => { pagination.pageSize = size; fetchData(current) }"
-      />
+        @show-size-change="(current, size) => { pagination.pageSize = size; fetchData(current) }" />
     </div>
 
     <!-- Form Modal -->
-    <a-modal
-      v-model:open="formVisible"
-      :title="selected ? 'Edit Professor' : 'Add Professor'"
-      destroy-on-close
-      @ok="handleSubmit"
-    >
+    <a-modal v-model:open="formVisible" :title="selected ? 'Edit Professor' : 'Add Professor'" destroy-on-close
+      @ok="handleSubmit">
       <a-form ref="formRef" :model="form" layout="vertical">
         <a-row :gutter="16">
           <a-col :span="12">
@@ -268,15 +294,25 @@ onMounted(() => {
         </a-form-item>
 
         <a-form-item label="Department" name="department_id">
-          <a-select
-            v-model:value="form.department_id"
-            :options="departments"
-            :loading="departmentsLoading"
-            show-search
-            option-filter-prop="label"
-          />
+          <a-select v-model:value="form.department_id" :options="departments" :loading="departmentsLoading" show-search
+            option-filter-prop="label" />
         </a-form-item>
       </a-form>
     </a-modal>
+    <!-- Schedules Drawer -->
+    <a-drawer v-model:open="schedulesDrawerVisible"
+      :title="`Schedules for ${selectedProfessor?.first_name} ${selectedProfessor?.last_name}`" width="60%">
+      <a-spin :spinning="schedulesLoading">
+        <a-table :data-source="schedules" row-key="id" bordered :columns="[
+          { title: 'Subject', dataIndex: 'title' },
+          { title: 'Section', dataIndex: 'section' },
+          { title: 'Room', dataIndex: 'room' },
+          { title: 'Day', dataIndex: 'day_of_week' },
+          { title: 'Start', dataIndex: 'start_time' },
+          { title: 'End', dataIndex: 'end_time' },
+        ]" />
+      </a-spin>
+    </a-drawer>
+
   </div>
 </template>
