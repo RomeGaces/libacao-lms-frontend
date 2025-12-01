@@ -291,6 +291,28 @@ export function getRouteMenusApi() {
         keepAlive: false,
         locale: 'Sections Setup',
       },
+       {
+        id: 27,
+        parentId: null,
+        title: 'Admin Setup',
+        icon: 'DashboardOutlined',
+        component: '/admin/index',
+        path: '/admin',
+        name: 'AdminSetup',
+        keepAlive: false,
+        locale: 'Admin Setup',
+      },
+       {
+        id: 28,
+        parentId: null,
+        title: 'Students Setup',
+        icon: 'DashboardOutlined',
+        component: '/students/index',
+        path: '/students',
+        name: 'StudentSetup',
+        keepAlive: false,
+        locale: 'Student Setup',
+      },
     ],
   }
 }

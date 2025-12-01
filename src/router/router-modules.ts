@@ -38,8 +38,8 @@ export function getRouterModule(path?: string): any {
   if (path.startsWith('/'))
     path = path.slice(1)
   // Assembled data format
-  const fullPath = `/src/pages/${path}.vue`
-  const fullPathIndex = `/src/pages/${path}/index.vue`
+  const fullPath = `/resources/js/LMS/pages/${path}.vue`
+  const fullPathIndex = `/resources/js/LMS/pages/${path}/index.vue`
   if (fullPathIndex in routerModules)
     return checkEager(routerModules[fullPathIndex])
 
