@@ -214,7 +214,7 @@ onMounted(() => {
         :show-size-changer="true"
         :show-total="(total: number) => `Total ${total} professors`"
         @change="handlePageChange"
-        @show-size-change="(current: number, size: number) => { pagination.pageSize = size; fetchData(current) }"
+        @show-size-change="(current, size) => { pagination.pageSize = size; fetchData(current) }"
       />
     </div>
 

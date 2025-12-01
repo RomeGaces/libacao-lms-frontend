@@ -50,28 +50,18 @@ export const useLayoutMenu = defineStore('layout-menu', () => {
   const findMenuByPath: any = (path: string) => (obj: MenuData) =>
     deepFind(o => o.path === path)(obj)
   const handleAccordionMode = (innerOpenKeys: string[]) => {
-    const rootSubmenuKeys: string[] = (menuData.value ?? []).map(
-      (item: MenuDataItem) => item.path,
-    )
-
-    const latestOpenKey = innerOpenKeys.find(
-      key => !openKeys.value.includes(key),
-    )
-
+    const rootSubmenuKeys: string[] | undefined = menuData.value?.map((item) => {
+      return item.path
+    })
+    const latestOpenKey = innerOpenKeys.find(key => !openKeys.value.includes(key))
     if (latestOpenKey) {
       if (!rootSubmenuKeys.includes(latestOpenKey)) {
+        // 与 前一项比较 是否为同一级，同级则移除前一项
         const prevKey = innerOpenKeys[innerOpenKeys.length - 2]
         const preMenuItem = findMenuByPath(prevKey)(menuData.value)
         const latestOpenMenuItem = findMenuByPath(latestOpenKey)(menuData.value)
-
-        if (
-          preMenuItem
-          && latestOpenMenuItem
-          && preMenuItem.parentId === latestOpenMenuItem.parentId
-        ) {
+        if (preMenuItem && latestOpenMenuItem && preMenuItem.parentId === latestOpenMenuItem.parentId)
           innerOpenKeys.splice(innerOpenKeys.indexOf(prevKey), 1)
-        }
-
         openKeys.value = innerOpenKeys
       }
       else {

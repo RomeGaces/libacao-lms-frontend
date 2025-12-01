@@ -52,13 +52,13 @@ const isCurrentDisabled = computed(() => {
 
 function leftDisabled(key: string) {
   // 判断左侧是否还有可关闭的
-  const index = list.value.findIndex((v: { fullPath: string }) => v.fullPath === key)
+  const index = list.value.findIndex(v => v.fullPath === key)
   return index === 0 || list.value.filter(v => !v.affix).length <= 1
 }
 
 function rightDisabled(key: string) {
   // 判断右侧是否还有可关闭的
-  const index = list.value.findIndex((v: { fullPath: string }) => v.fullPath === key)
+  const index = list.value.findIndex(v => v.fullPath === key)
   return (
     index === list.value.length - 1
     || list.value.filter(v => !v.affix).length <= 1
@@ -72,7 +72,7 @@ const otherDisabled = computed(() => {
 listenerRouteChange((route: RouteLocationNormalized) => {
   if (route.fullPath.startsWith('/redirect'))
     return
-  const item = list.value.find((item: { fullPath: string }) => item.fullPath === route.fullPath)
+  const item = list.value.find(item => item.fullPath === route.fullPath)
 
   if (route.fullPath === activeKey.value && !item?.loading)
     return
