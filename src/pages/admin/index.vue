@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { message, Modal } from 'ant-design-vue'
+import { message } from 'ant-design-vue'
 
 import MasterSetupWizard from './components/MasterSetupWizard.vue'
 import CourseBreakdownCard from './components/CourseBreakdownCard.vue'
