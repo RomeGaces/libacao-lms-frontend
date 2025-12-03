@@ -1,1 +1,0 @@
-import{r as e,wt as t}from"./vue-C3eY3n8m.js";const n={xl:1600,lg:1199,md:991,sm:767,xs:575};function r(){let r=t(e(n)),i=r.smaller(`sm`),a=r.between(`sm`,`md`),o=r.greater(`md`);return{breakpoints:r,isMobile:i,isPad:a,isDesktop:o}}export{r as t};
