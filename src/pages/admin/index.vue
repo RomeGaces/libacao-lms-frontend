@@ -6,9 +6,8 @@ import { message } from 'ant-design-vue'
 
 interface AcademicYear {
   id: number
-  name: string
-  start_date?: string
-  end_date?: string
+  year_start?: string
+  year_end?: string
 }
 
 interface CourseSummary {
@@ -21,22 +20,37 @@ interface CourseSummary {
 
 const showWizard = ref(false)
 
-const currentAY = ref<AcademicYear | null>(null)
+const academicYear = ref<AcademicYear | null>(null)
+const semester = ref<any | null>(null)
+
 const stats = ref({
   total_students: 0,
   total_sections: 0,
   total_courses: 0
 })
-const courses = ref<CourseSummary[]>([])
 
-async function loadDashboard() {
+const courses = ref<CourseSummary[]>([])
+const loading = ref(false)
+
+const loadDashboard = async () => {
+  loading.value = true
   try {
-    const res = await useGet('/dashboard/ay-summary')
-    currentAY.value = res.data.current_academic_year
-    stats.value = res.data.stats
-    courses.value = res.data.courses
-  } catch (e: any) {
-    message.error('Failed to load dashboard data.')
+    const [summaryRes, activeSYRes, activeSemRes] = await Promise.all([
+      useGet("/dashboard/ay-summary"),
+      useGet("/master/active-school-year"),
+      useGet("/master/active-semester"),
+    ])
+
+    stats.value = summaryRes.data.stats
+    courses.value = summaryRes.data.courses
+
+    academicYear.value = activeSYRes.data.data
+    semester.value = activeSemRes.data.data
+
+  } catch (e) {
+    message.error("Failed loading dashboard")
+  } finally {
+    loading.value = false
   }
 }
 
@@ -44,13 +58,33 @@ onMounted(loadDashboard)
 </script>
 
 <template>
-  <div class="dashboard space-y-6">
 
+
+  <div class="dashboard space-y-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <!-- Active Academic Year -->
+      <div class="bg-[#1f1f1f] shadow rounded p-4 text-gray-100">
+        <p class="text-lg font-semibold">Active Academic Year</p>
+        <p v-if="academicYear" class="mt-1 text-gray-300">
+          {{ academicYear.year_start }} – {{ academicYear.year_end }}
+        </p>
+      </div>
+
+      <!-- Active Semester -->
+      <div class="bg-[#1f1f1f] shadow rounded p-4 text-gray-100">
+        <p class="text-lg font-semibold">Active Semester</p>
+        <p v-if="semester" class="mt-1 text-gray-300">
+          {{ semester?.name }}
+        </p>
+      </div>
+    </div>
     <h1 class="text-2xl font-bold mb-3">Academic Year Dashboard</h1>
 
     <!-- Quick Statistics -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <a-card title="Current AY">{{ currentAY?.name }}</a-card>
+      <a-card title="Current AY">
+        {{ academicYear ? academicYear.year_start + ' - ' + academicYear.year_end : '' }}
+      </a-card>
       <a-card title="Total Students">{{ stats.total_students }}</a-card>
       <a-card title="Total Sections">{{ stats.total_sections }}</a-card>
       <a-card title="Courses">{{ stats.total_courses }}</a-card>

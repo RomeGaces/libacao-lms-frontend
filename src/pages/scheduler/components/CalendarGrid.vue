@@ -10,6 +10,8 @@ const props = defineProps<{
     dayColumnWidth: number;
 }>();
 
+const fixedTimeSlots = Array.from({ length: 25 }, (_, i) => 420 + i * 30);
+const computedGridHeight = fixedTimeSlots.length * props.slotHeightPx;
 const emit = defineEmits<{
     (e: "scroll", ev: Event): void;
 }>();
@@ -41,7 +43,7 @@ defineExpose({
         <div class="calendar-body">
             <!-- TIME COLUMN -->
             <div class="time-col sticky-time-col">
-                <div v-for="slot in props.timeSlots" :key="slot" class="time-slot"
+                <div v-for="slot in fixedTimeSlots" :key="slot" class="time-slot"
                     :style="{ height: `${props.slotHeightPx}px` }">
                     <div v-if="slot % 60 === 0" class="time-text">
                         {{ formatHour(slot) }}
@@ -52,13 +54,13 @@ defineExpose({
             <!-- MAIN GRID -->
             <div ref="localDaysGridRef" class="days-grid" @scroll="($event) => emit('scroll', $event)">
                 <div class="days-row" :style="{
-                    height: `${props.totalGridHeight}px`,
+                    height: `${computedGridHeight}px`,
                     minWidth: `${220 * props.displayDays.length}px`
                 }">
                     <!-- DAY COLUMN -->
                     <div v-for="day in props.displayDays" :key="day.key" class="day-column">
                         <!-- BG SLOTS -->
-                        <div v-for="slot in props.timeSlots" :key="`bg-${day.key}-${slot}`" class="bg-slot"
+                        <div v-for="slot in fixedTimeSlots" :key="`bg-${day.key}-${slot}`" class="bg-slot"
                             :style="{ height: `${props.slotHeightPx}px` }" />
 
                         <!-- EVENTS SLOT -->
@@ -138,7 +140,6 @@ export function formatHour(minute: number) {
 
 .days-row {
     display: flex;
-    padding-top: 8px;
 }
 
 .day-column {

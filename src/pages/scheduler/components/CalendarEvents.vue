@@ -13,6 +13,8 @@ interface CalendarEvent {
   raw: any;
 }
 
+
+
 const {
   day,
   dayRenderData,
@@ -33,6 +35,7 @@ const {
   eventRefs: HTMLElement[];
   eventLoadingId: number | null;
 }>();
+
 </script>
 
 <template>
