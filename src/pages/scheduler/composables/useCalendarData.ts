@@ -102,7 +102,9 @@ export default function useCalendarData() {
     const hourHeight = computed(() => {
         const minutes = Math.max(60, dayEndMinute.value - dayStartMinute.value)
         const hours = minutes / 60
-        const h = containerHeightPx.value ? containerHeightPx.value / hours : 62
+        const h = containerHeightPx.value
+            ? Math.min(containerHeightPx.value / hours, 70) // cap max height
+            : 62
         return Math.max(40, h)
     })
     const slotHeightPx = computed(() => (hourHeight.value * (slotMinutes / 60)))
