@@ -159,7 +159,7 @@ const save = async () => {
     if (!form.value.email)
       return message.error("Email is required.")
 
-    const emailRegex = /^[a-z]+\.[a-z]?\.[a-z]+[0-9]*@libacao\.edu\.ph$/
+    const emailRegex = /^[a-z]+(?:\.[a-z]+)?\.[a-z]+[0-9]*@libacao\.edu\.ph$/;
     if (!emailRegex.test(form.value.email))
       return message.error("Email format is invalid.")
 

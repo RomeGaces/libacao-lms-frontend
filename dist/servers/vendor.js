@@ -7,6 +7,7 @@ import logout_default from "./servers/routes/logout.js";
 import test_delete_default from "./servers/routes/test.delete.js";
 import test_post_default from "./servers/routes/test.post.js";
 import test_put_default from "./servers/routes/test.put.js";
+import menu_default from "./servers/routes/menu/index.js";
 import basic_list_post_default from "./servers/routes/list/basic-list.post.js";
 import consult_list_post_default from "./servers/routes/list/consult-list.post.js";
 import create_post_default from "./servers/routes/list/create.post.js";
@@ -14,7 +15,6 @@ import crud_table_post_default from "./servers/routes/list/crud-table.post.js";
 import index_post_default from "./servers/routes/list/index.post.js";
 import index_put_default from "./servers/routes/list/index.put.js";
 import __id__delete_default from "./servers/routes/list/_id_.delete.js";
-import menu_default from "./servers/routes/menu/index.js";
 import info_default from "./servers/routes/user/info.js";
 
 //#region servers/.runtime/vendor.ts
@@ -28,6 +28,7 @@ const vendorMap = {
 	"routes/test.delete": test_delete_default,
 	"routes/test.post": test_post_default,
 	"routes/test.put": test_put_default,
+	"routes/menu/index": menu_default,
 	"routes/list/basic-list.post": basic_list_post_default,
 	"routes/list/consult-list.post": consult_list_post_default,
 	"routes/list/create.post": create_post_default,
@@ -35,7 +36,6 @@ const vendorMap = {
 	"routes/list/index.post": index_post_default,
 	"routes/list/index.put": index_put_default,
 	"routes/list/[id].delete": __id__delete_default,
-	"routes/menu/index": menu_default,
 	"routes/user/info": info_default
 };
 

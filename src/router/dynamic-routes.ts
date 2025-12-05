@@ -425,24 +425,24 @@ export default [
     },
     component: basicRouteMap.RouteView,
     children: [
-      {
-        path: '/account/center',
-        name: 'AccountCenter',
-        component: () => import('~/pages/account/center.vue'),
-        meta: {
-          title: 'Personal homepage',
-          locale: 'menu.account.center',
-        },
-      },
-      {
-        path: '/account/settings',
-        name: 'AccountSettings',
-        component: () => import('~/pages/account/settings.vue'),
-        meta: {
-          title: 'personal settings',
-          locale: 'menu.account.settings',
-        },
-      },
+      // {
+      //   path: '/account/center',
+      //   name: 'AccountCenter',
+      //   component: () => import('~/pages/account/center.vue'),
+      //   meta: {
+      //     title: 'Personal homepage',
+      //     locale: 'menu.account.center',
+      //   },
+      // },
+      // {
+      //   path: '/account/settings',
+      //   name: 'AccountSettings',
+      //   component: () => import('~/pages/account/settings.vue'),
+      //   meta: {
+      //     title: 'personal settings',
+      //     locale: 'menu.account.settings',
+      //   },
+      // },
       {
         path: '/account/settings/:id',
         name: 'AccountSettings1',

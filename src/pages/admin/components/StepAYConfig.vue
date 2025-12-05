@@ -24,7 +24,10 @@ const semesters = ref<Semester[]>([]);
 
 const loadSemesters = async () => {
   const res = await useGet("/master/semesters");
-  semesters.value = res.data.data;
+
+  semesters.value = (res.data.data || []).filter(
+    (sem: { is_active: boolean; }) => !sem.is_active
+  );
 };
 
 onMounted(loadSemesters);

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { h } from "vue";
-import type { EditConflictInterface, RoomInterface } from "~@/types";
+import type { EditConflictInterface, RoomInterface, EditFormInterface } from "~@/types";
 
 const allTimes = [
     "07:00", "07:05", "07:10", "07:15", "07:20", "07:25", "07:30", "07:35", "07:40", "07:45", "07:50", "07:55",
@@ -20,19 +20,7 @@ const allTimes = [
 
 const endTimeOptions = ref(allTimes)
 
-interface EditFormInterface {
-    id: number | null;
-    subject_id: number | undefined;
-    professor_id: number | undefined;
-    building: string | undefined;
-    room_id: number | undefined;
-    day_of_week: string | undefined;
-    start_time: string | undefined;
-    end_time: string | undefined;
-    section_id: number | undefined;
-    course_id: number | undefined;
-    year_level: number | undefined;
-}
+
 
 // Props
 const {
@@ -182,11 +170,11 @@ watch(
 
                 <a-form-item label="Subject" name="subject_id" hidden>
                     <a-select v-model:value="editForm.subject_id" style="width:100%" :options="subjectOptions"
-                        option-filter-prop="label" />
+                        option-filter-prop="label" allow-clear />
                 </a-form-item>
-
+                
                 <a-form-item label="Professor" name="professor_id">
-                    <a-select v-model:value="editForm.professor_id" style="width:100%" :options="professorOptions" />
+                    <a-select v-model:value="editForm.professor_id" style="width:100%" :options="professorOptions" allow-clear />
                 </a-form-item>
 
                 <a-form-item label="Building" name="building">
@@ -196,7 +184,7 @@ watch(
 
                 <a-form-item label="Room" name="room_id">
                     <a-select v-model:value="editForm.room_id" style="width:100%" :options="roomOptions"
-                        option-filter-prop="label" />
+                        option-filter-prop="label" allow-clear />
                 </a-form-item>
 
                 <a-form-item label="Day" name="day_of_week">

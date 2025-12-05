@@ -7,6 +7,7 @@ export interface EditConflictInterface {
 }
 
 export interface RoomInterface {
+    building: string;
     id: number;
     room_number: string;
     building_name: string;
@@ -61,9 +62,23 @@ export interface CalendarEvent {
     [key: string]: any
 }
 
-export interface ProfessorInterface{
-   id: number,
-   first_name: string,
-   last_name: string,
-   middle_name: string
+export interface ProfessorInterface {
+    id: number,
+    first_name: string,
+    last_name: string,
+    middle_name: string
+}
+
+export interface EditFormInterface {
+    id?: number | null | undefined;
+    subject_id: number | undefined;
+    section_id?: number | undefined;
+    course_id?: number | undefined;
+    year_level?: number | undefined;
+    professor_id: number | undefined;
+    room_id: number | undefined;
+    day_of_week: string | undefined;
+    start_time: string | undefined;
+    end_time: string | undefined;
+    building: string | undefined;
 }

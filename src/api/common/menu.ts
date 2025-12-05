@@ -266,6 +266,17 @@ export function getRouteMenusApi() {
         keepAlive: false,
         locale: 'Departments',
       },
+       {
+        id: 30,
+        parentId: 29,
+        title: 'Semesters',
+        icon: 'DashboardOutlined',
+        component: '/semester/index',
+        path: '/setup/semesters',
+        name: 'SemestersSetup',
+        keepAlive: false,
+        locale: 'Semesters',
+      },
       {
         id: 24,
         parentId: 29,

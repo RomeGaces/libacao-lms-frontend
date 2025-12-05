@@ -115,21 +115,24 @@ onMounted(async () => {
 
         <!-- EVENTS SLOT -->
         <template #events="{ day }">
-          <CalendarEvents :day="day" :day-render-data="dayRenderData" :event-style="eventStyle" :event-loading-id="eventLoadingId"
-            :on-event-click="onEventClick" :on-group-summary-click="onGroupSummaryClick" :event-refs="eventRefs" />
+          <CalendarEvents :day="day" :day-render-data="dayRenderData" :event-style="eventStyle"
+            :event-loading-id="eventLoadingId" :on-event-click="onEventClick"
+            :on-group-summary-click="onGroupSummaryClick" :event-refs="eventRefs" />
         </template>
 
       </CalendarGrid>
     </div>
 
     <!-- DRAWER -->
-    <EventDrawer v-model:visible="drawerVisible" :editForm="editForm" :editConflict="editConflict" :title="drawerTitle" :mode="drawerMode" :drawer-data="drawerData" :isSaving="isSaving"
-      :subject-options="subjectOptions" :professor-options="professorOptions" :all-rooms="allRooms"
-      :building-options="buildingOptions" :time-options="timeOptions" @close="closeDrawer"
-      @open-edit="openEditModalForClass"  @save="saveEditedClass" />
+    <EventDrawer v-model:visible="drawerVisible" :editForm="editForm" :editConflict="editConflict" :title="drawerTitle"
+      :mode="drawerMode" :drawer-data="drawerData" :isSaving="isSaving" :subject-options="subjectOptions"
+      :professor-options="professorOptions" :all-rooms="allRooms" :building-options="buildingOptions"
+      :time-options="timeOptions" @close="closeDrawer" @open-edit="openEditModalForClass" @save="saveEditedClass" />
 
     <!-- EDIT MODAL -->
-    <EventEditModal v-model:visible="editModalVisible" :data="editModalData" :time-options="timeOptions"
+    <EventEditModal v-model:visible="editModalVisible" :data="editModalData" :subjectOptions="subjectOptions"
+      :professorOptions="professorOptions" :buildingOptions="buildingOptions" :allRooms="allRooms"
+      :timeOptions="timeOptions" :editForm="editForm" :editConflict="editConflict" :isSaving="isSaving"
       @save="saveEditedClass" />
 
   </div>

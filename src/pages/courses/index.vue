@@ -21,6 +21,22 @@ const subjectForm = reactive<any>({})
 const selectedCourse = ref<any | null>(null)
 const subjectFormRef = ref()
 
+const semesters = ref<{ label: string; value: number }[]>([])
+const semestersLoading = ref(false)
+
+const loadSemesters = async () => {
+  semestersLoading.value = true
+  try {
+    const { data } = await operations.list("semesters") // GET /semesters
+    semesters.value = data.map((s: { name: any; id: any }) => ({
+      label: s.name,
+      value: s.id,
+    }))
+  } finally {
+    semestersLoading.value = false
+  }
+}
+
 // Pagination
 const pagination = reactive({
   current: 1,
@@ -204,6 +220,7 @@ async function deleteSubject(record: any) {
 onMounted(() => {
   fetchData()
   fetchDepartments()
+  loadSemesters()
 })
 </script>
 
@@ -274,7 +291,7 @@ onMounted(() => {
         { title: 'Name', dataIndex: 'subject_name' },
         { title: 'Units', dataIndex: 'units' },
         { title: 'Year', dataIndex: 'year_level' },
-        { title: 'Semester', dataIndex: 'semester' },
+        { title: 'Semester', dataIndex: 'semester_id' },
         { title: 'Actions', dataIndex: 'actions' },
       ]">
         <template #bodyCell="{ column, record }">
@@ -310,12 +327,9 @@ onMounted(() => {
               { label: '4th Year', value: 4 },
             ]" />
           </a-form-item>
-          <a-form-item label="Semester" name="semester">
-            <a-select v-model:value="subjectForm.semester" :options="[
-              { label: '1st', value: '1st' },
-              { label: '2nd', value: '2nd' },
-              { label: 'Summer', value: 'Summer' },
-            ]" />
+          <a-form-item label="Semester" name="semester_id">
+            <a-select v-model:value="subjectForm.semester_id" :options="semesters" :loading="semestersLoading"
+              placeholder="Select semester" style="width: 100%" />
           </a-form-item>
         </a-form>
       </a-modal>

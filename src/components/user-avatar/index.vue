@@ -35,7 +35,7 @@ async function handleClick({ key }: any) {
     </span>
     <template #overlay>
       <a-menu @click="handleClick">
-        <a-menu-item key="0">
+        <!-- <a-menu-item key="0">
           <template #icon>
             <UserOutlined />
           </template>
@@ -50,7 +50,7 @@ async function handleClick({ key }: any) {
           <RouterLink to="/account/settings">
             Account Settings
           </RouterLink>
-        </a-menu-item>
+        </a-menu-item> -->
         <a-menu-divider />
         <a-menu-item key="logout">
           <template #icon>

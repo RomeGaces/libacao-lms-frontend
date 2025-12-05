@@ -69,15 +69,15 @@ export default function useCalendarData() {
     const editModalData = ref<ClassItem | null>(null)
     const editForm = reactive({
         id: null,
-        subject_id: undefined,
-        professor_id: undefined,
+        subject_id: undefined as number | undefined,
+        professor_id: undefined as number | undefined,
         building: undefined,
-        room_id: undefined,
+        room_id: undefined as number | undefined,
         day_of_week: undefined,
         start_time: undefined,
         end_time: undefined,
-        section_id: undefined,
-        course_id: undefined,
+        section_id: undefined as number | undefined,
+        course_id: undefined as number | undefined,
         year_level: undefined,
     })
 
@@ -321,7 +321,7 @@ export default function useCalendarData() {
         if (!group.length) return
         drawerData.value = group.slice()
         drawerTitle.value = `${dayKey} — ${formatTimeRange(Math.min(...group.map(g => g.start)), Math.max(...group.map(g => g.end)))}`
-        drawerMode.value = 'multi-timeslot'
+        drawerMode.value = 'list-single-timeslot'
         drawerVisible.value = true
     }
 
@@ -330,9 +330,32 @@ export default function useCalendarData() {
         drawerData.value = []
     }
 
-    function openEditModalForClass(c: ClassItem) {
-        editModalData.value = c
-        editModalVisible.value = true
+    async function openEditModalForClass(c: ClassItem) {
+        // load edit form data
+        try {
+            editModalData.value = c
+            const cls = c
+            eventLoadingId.value = cls.id;
+            const res = await useGet(`/schedules/${cls.id}`)
+            const sched = res.data
+            editForm.id = sched.id
+            editForm.subject_id = sched.subject_id
+            editForm.professor_id = sched.professor_id
+            editForm.building = sched.room?.building_name || null
+            editForm.room_id = sched.room_id
+            editForm.day_of_week = sched.day_of_week
+            editForm.start_time = sched.start_time?.slice(0, 5)
+            editForm.end_time = sched.end_time?.slice(0, 5)
+            editForm.section_id = sched.class_section_id
+            editForm.course_id = sched.class_section?.course_id
+            editForm.year_level = sched.class_section?.year_level
+            await loadEditFormDropdowns()
+        } catch (e) {
+            console.error(e);
+        } finally {
+            editModalVisible.value = true
+            eventLoadingId.value = null;
+        }
     }
 
     async function saveEditedClass() {
@@ -370,6 +393,7 @@ export default function useCalendarData() {
         conflictTimer = window.setTimeout(async () => {
             if (!editForm.start_time || !editForm.end_time || !editForm.day_of_week) return
             const payload = {
+                class_id: editForm.id,
                 professor_id: Number(editForm.professor_id),
                 room_id: Number(editForm.room_id),
                 class_section_id: Number(editForm.section_id),
@@ -377,8 +401,13 @@ export default function useCalendarData() {
                 start_time: editForm.start_time,
                 end_time: editForm.end_time,
             }
-            const res = await usePost('/schedules/check-conflict', payload)
-            editConflict.value = res.data
+            try {
+                const res = await usePost('/schedules/check-conflict', payload)
+                editConflict.value = res.data
+            } catch (e) {
+                console.error(e);
+            }
+
         }, 220)
     }
 
