@@ -345,24 +345,6 @@ const menuData = [
 		locale: "menu.account"
 	},
 	{
-		id: 37,
-		parentId: 36,
-		path: "/account/center",
-		title: "个人中心",
-		name: "AccountCenter",
-		component: "/account/center",
-		locale: "menu.account.center"
-	},
-	{
-		id: 38,
-		parentId: 36,
-		path: "/account/settings",
-		title: "个人设置",
-		name: "AccountSettings",
-		component: "/account/settings",
-		locale: "menu.account.settings"
-	},
-	{
 		id: 39,
 		parentId: 3,
 		title: "分步表单",

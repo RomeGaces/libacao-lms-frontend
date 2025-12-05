@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { LogoutOutlined, ProfileOutlined, UserOutlined } from '@ant-design/icons-vue'
+import { LogoutOutlined } from '@ant-design/icons-vue'
 
 const message = useMessage()
 const userStore = useUserStore()
