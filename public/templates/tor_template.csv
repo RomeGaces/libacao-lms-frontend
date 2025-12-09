@@ -1,0 +1,4 @@
+student_number,subject_code,grade,remark,class_section,school_year,semester,year_level
+2025-00001,IT101,1.5,Passed,IT1A,2022-2023,1st Semester,1
+2025-00001,ENG101,2.0,Passed,IT1A,2022-2023,1st Semester,1
+2025-00002,IT101,2.5,Passed,IT1B,2022-2023,1st Semester,1

@@ -1,0 +1,6 @@
+course_code,subject_code,subject_name,units,year_level,semester,subject_prerequisite_code,type,hours_per_week,description
+BSIT,IT101,Introduction to IT,3,1,1st Semester,,Lecture,3,Foundation of IT industry
+BSIT,IT102,Programming 1,3,1,1st Semester,,Lecture,3,Basic programming constructs
+BSIT,IT201,Programming 2,3,2,1st Semester,IT102,Lecture,3,Continuation of programming 1
+BSIT,IT202,Data Structures,3,2,2nd Semester,IT201,Lecture,3,Algorithms and data management
+BSIT,ENG101,Communication Skills,3,1,1st Semester,,Lecture,3,Basic English communication

@@ -1,0 +1,4 @@
+student_number,first_name,middle_name,last_name,gender,birth_date,course_code,year_level,email,phone_number,address,status
+2025-00001,Juan,Santos,Dela Cruz,Male,3/12/2005,BSEE,1,juan.delacruz@example.com,9171234567,Brgy. Sampaloc,Active
+2022-00002,Maria,Cruz,Gonzales,Female,7/18/2005,BSEE,1,maria.gonzales@example.com,9181234567,Brgy. Banaba,Graduated
+2025-00003,Ronald,,Garcia,Male,11/22/2004,BSEE,2,ronald.garcia@example.com,9191234567,Brgy. San Roque,Inactive

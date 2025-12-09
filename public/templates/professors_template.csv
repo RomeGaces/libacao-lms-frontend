@@ -1,0 +1,4 @@
+first_name,middle_name,last_name,gender,email,phone_number,hire_date,specialization,status,department_code
+Jose,,Reyes,Male,jose.reyes@example.com,9170000001,1/15/2020,IT Programming,active,DCE
+Ana,Lopez,Santos,Female,ana.santos@example.com,9170000002,6/20/2019,Mathematics,active,DCE
+Michael,,De Leon,Male,michael.deleon@example.com,9170000003,3/10/2022,Hospitality Management,inactive,DCE

@@ -299,6 +299,17 @@ export function getRouteMenusApi() {
         keepAlive: false,
         locale: 'Courses Setup',
       },
+      {
+        id: 32,
+        parentId: 29,
+        title: 'Data Import',
+        icon: 'DashboardOutlined',
+        component: '/dataimporter/index',
+        path: '/setup/data',
+        name: 'DataImportSetup',
+        keepAlive: false,
+        locale: 'Data Setup',
+      },
       // {
       //   id: 11,
       //   parentId: 14,
@@ -334,10 +345,6 @@ export function getRouteMenusApi() {
         keepAlive: false,
         locale: 'Class Timeslot Schedules',
       },
-
-
-
-
       // {
       //   id: 26,
       //   parentId: null,
@@ -349,8 +356,6 @@ export function getRouteMenusApi() {
       //   keepAlive: false,
       //   locale: 'Sections Setup',
       // },
-
-
     ],
   }
 }
